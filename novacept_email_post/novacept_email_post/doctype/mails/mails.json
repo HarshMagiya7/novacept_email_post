@@ -1,0 +1,106 @@
+{
+ "actions": [],
+ "autoname": "format: MAIL-{YYYY}-{MM}-{DD}-{###}",
+ "creation": "2022-12-24 00:01:36.206671",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "sender",
+  "recipient_mail",
+  "sent_time",
+  "doc_status",
+  "error",
+  "tab_break_8",
+  "subject",
+  "content"
+ ],
+ "fields": [
+  {
+   "fieldname": "recipient_mail",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Recipient Mail"
+  },
+  {
+   "fieldname": "sender",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Sender",
+   "options": "User"
+  },
+  {
+   "fieldname": "sent_time",
+   "fieldtype": "Datetime",
+   "label": "Sent Time"
+  },
+  {
+   "fieldname": "tab_break_8",
+   "fieldtype": "Tab Break",
+   "label": "Mail Content"
+  },
+  {
+   "fieldname": "subject",
+   "fieldtype": "Data",
+   "label": "Subject"
+  },
+  {
+   "fieldname": "content",
+   "fieldtype": "Text Editor",
+   "label": "Content"
+  },
+  {
+   "depends_on": "eval:doc.doc_status == 'FAILED'",
+   "fieldname": "error",
+   "fieldtype": "JSON",
+   "label": "Error"
+  },
+  {
+   "fieldname": "doc_status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "\nSUCCESS\nFAILED"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2022-12-24 01:22:02.486547",
+ "modified_by": "Administrator",
+ "module": "Novacept Email Post",
+ "name": "Mails",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "All",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}
