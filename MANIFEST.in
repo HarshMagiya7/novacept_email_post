@@ -1,0 +1,18 @@
+include MANIFEST.in
+include requirements.txt
+include *.json
+include *.md
+include *.py
+include *.txt
+recursive-include novacept_email_post *.css
+recursive-include novacept_email_post *.csv
+recursive-include novacept_email_post *.html
+recursive-include novacept_email_post *.ico
+recursive-include novacept_email_post *.js
+recursive-include novacept_email_post *.json
+recursive-include novacept_email_post *.md
+recursive-include novacept_email_post *.png
+recursive-include novacept_email_post *.py
+recursive-include novacept_email_post *.svg
+recursive-include novacept_email_post *.txt
+recursive-exclude novacept_email_post *.pyc
