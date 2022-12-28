@@ -10,18 +10,17 @@ from frappe.core.doctype.communication.email import make
 from frappe.model.document import Document
 from frappe.utils import add_days, getdate, today, get_datetime
 import datetime
-print('msal')
 import msal
 import requests
 import json
-
+import re
 class NovaceptEmailPost(Document):
 	def validate(self):
 		self.set_date()
 		self.trial()
 		# checking if email is set for lead. Not checking for contact as email is a mandatory field for contact.
-		if self.email_campaign_for == "Lead":
-			self.validate_lead()
+		if self.email_campaign_for == "Client":
+			self.validate_client()
 		self.validate_email_camp_already_exists()
 		self.update_status()
 
@@ -42,11 +41,11 @@ class NovaceptEmailPost(Document):
 				_("Please set up the Campaign Schedule in the Campaign {0}").format(self.campaign_name)
 			)
 
-	def validate_lead(self):
-		lead_email_id = frappe.db.get_value("Lead", self.recipient, "email_id")
+	def validate_client(self):
+		client_email_id = frappe.db.get_value("Client", self.recipient, "email_id")
 		if not lead_email_id:
-			lead_name = frappe.db.get_value("Lead", self.recipient, "lead_name")
-			frappe.throw(_("Please set an email id for the Lead {0}").format(lead_name))
+			lead_name = frappe.db.get_value("Client", self.recipient, "customer_name")
+			frappe.throw(_("Please set an email id for the Client {0}").format(lead_name))
 
 	def trial(self):
 		print(self.last_post_time)
@@ -73,11 +72,12 @@ class NovaceptEmailPost(Document):
 		end_date = getdate(self.end_date)
 		today_date = getdate(today())
 		if start_date > today_date:
-			self.status = "Scheduled"
+			self.db_set("status", "Scheduled")
 		elif end_date >= today_date:
-			self.status = "In Progress"
+			self.db_set("status","In Progress")
 		elif end_date < today_date:
-			self.status = "Completed"
+			self.db_set("status","Completed")
+
 
 	def update_post_status(self):
 		frappe.db.set_value("Novacept Email Post",self.name,"last_post_time",frappe.utils.now_datetime())
@@ -99,6 +99,8 @@ def send_email_to_leads_or_contacts():
 #			last_post = email_camp.get("last_post_time")
 			print(last_post)
 			if last_post < scheduled_date < frappe.utils.now_datetime():
+				print(entry.name)
+				print(entry)
 				send_mail(entry, email_camp)
 				email_camp.update_post_status()
 def send_mail(entry, email_camp):
@@ -125,44 +127,58 @@ def send_mail(entry, email_camp):
 
 	recipient_list = []
 	if email_camp.email_campaign_for == "Client Group":
-		group = frappe.get_doc(email_camp.email_campaign_for,email_camp.get('recipient'))
-		for member in group.clients:
-			if frappe.db.get_value('Client',member.client_member,'email_id'):
-				recipient_list.append(frappe.db.get_value('Client',member.client_member,'email_id'))
+		client_list = frappe.get_doc('Client Group',email_camp.get('recipient'))
+		for i in client_list.clients:
+			client = frappe.get_doc('Client',i.client_member)
+			if client.email_id:
+				recipient_list.append(client.customer_name)
 	else:
-		print(email_camp.email_campaign_for)
-		print(email_camp.get("recipient"))
-		print(email_camp)
-		recipient_list.append(
-			frappe.db.get_value(
-				'Client',email_camp.get("recipient") ,"email_id"
+		recipient_list.append(email_camp.get('recipient'))
+#		group = frappe.get_doc(email_camp.email_campaign_for,email_camp.get('recipient'))
+#		for member in group.clients:
+#			if frappe.db.get_value('Client',member.client_member,'email_id'):
+#				recipient_list.append(frappe.db.get_value('Client',member.client_member,'email_id'))
+#	else:
+#		print(email_camp.email_campaign_for)
+#		print(email_camp.get("recipient"))
+#		print(email_camp)
+#		recipient_list.append(
+#			frappe.db.get_value(
+#				'Client',email_camp.get("recipient") ,"email_id"
+#
+#			)
+#		)
+#	print(f'Recipient: {recipient_list}')
 
-			)
-		)
-	print('Recipient: {recipient_list}')
+	print(entry.get("email_template"))
+	print(entry.get("name"))
 	email_template = frappe.get_doc("Email Template", entry.get("email_template"))
 	sender = email_camp.get("sender")
 	subject = email_template.get("subject")
 	body = email_template.get("response")
-
+	print(body)
+	print(subject)
 	if "access_token" in result:
+
 		for recipient in recipient_list:
+			recipient_mail,recipient_subject,recipient_body = personalize_mail(recipient,subject,body)
 			endpoint = f'https://graph.microsoft.com/v1.0/users/{sender}/sendMail'
 			email_msg = {
 				'Message': {
-					'Subject': subject,
+					'Subject': recipient_subject,
 					'Body': {
 						'ContentType': "HTML",
-						'Content': body
+						'Content': recipient_body
 					},
 					'ToRecipients': [
 					{
 						'EmailAddress': {
-							'Address': recipient
+							'Address': recipient_mail
 						}
 					}]
 				},
 			'SaveToSentItems': 'true'}
+
 			r= requests.post(endpoint,headers={'Authorization': 'Bearer ' + result['access_token']}, json=email_msg)
 
 			mail = frappe.new_doc('Mails')
@@ -187,16 +203,35 @@ def send_mail(entry, email_camp):
 		print(result.get("error_description"))
 		print(result.get("correlation_id"))
 
+def personalize_mail(client,subject,body):
+	mail = frappe.db.get_value('Client',client,'email_id')
+	new_subject = placeholder(client,subject)
+	new_body = placeholder(client,body)
+	return mail,new_subject,new_body
+def placeholder(client,text):
+	place_holder = re.findall('{doc.\w+}', text)
+#		print(place_holder)
+#		print(0)
+	if not place_holder:
+		return text
+#		print(1)
+	values = []
+	for var in place_holder:
+#			print(var)
+		var = var.replace('{doc.','')
+#			print(var)
+		var = var.replace('}','')
+#			print(var)
+		try:
+			value = frappe.db.get_value('Client',client,var)
+			values.append(value)
+		except:
+			values.append(var)
+#			print(values)
 
-
-
-
-
-
-
-
-
-
+	for i in range(len(place_holder)):
+		text = text.replace(place_holder[i],values[i])
+	return text
 
 
 

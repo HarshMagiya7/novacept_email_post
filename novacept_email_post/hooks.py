@@ -113,10 +113,12 @@ app_license = "MIT"
 # Scheduled Tasks
 # ---------------
 
-# scheduler_events = {
-#	"all": [
-#		"novacept_email_post.tasks.all"
-#	],
+scheduler_events = {
+	"all": [
+		"novacept_email_post.novacept_email_post.doctype.novacept_email_post.novacept_email_post.send_email_to_leads_or_contacts",
+		"novacept_email_post.novacept_email_post.doctype.novacept_email_post.novacept_email_post.set_email_campaign_status"
+	],
+}
 #	"daily": [
 #		"novacept_email_post.tasks.daily"
 #	],
