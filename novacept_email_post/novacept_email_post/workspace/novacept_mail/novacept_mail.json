@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Personal Blaster</span>\",\"col\":12}},{\"type\":\"card\",\"data\":{\"card_name\":\"Client\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Whatsapp\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Email Post\",\"col\":3}}]",
+ "content": "[{\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Novacept Mail</span>\",\"col\":12}},{\"type\":\"card\",\"data\":{\"card_name\":\"Client\",\"col\":3}},{\"type\":\"card\",\"data\":{\"card_name\":\"Novacept Mail\",\"col\":3}}]",
  "creation": "2022-12-29 01:02:00.157266",
  "docstatus": 0,
  "doctype": "Workspace",
@@ -92,18 +92,17 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Email Post",
-   "link_count": 4,
-   "link_type": "DocType",
+   "label": "Novacept Mail",
+   "link_count": 3,
    "onboard": 0,
    "type": "Card Break"
   },
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Email Post",
+   "label": "Novacept Mail",
    "link_count": 0,
-   "link_to": "Email Post",
+   "link_to": "Novacept Email Post",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -127,68 +126,9 @@
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Email Account",
-   "link_count": 0,
-   "link_to": "Email Account",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Whatsapp",
-   "link_count": 4,
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Whatsapp Post",
-   "link_count": 0,
-   "link_to": "Whatsapp Post",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Whatsapp Template",
-   "link_count": 0,
-   "link_to": "Whatsapp Template",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Whatsapp Setting",
-   "link_count": 0,
-   "link_to": "Whatsapp Setting",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Whatsapp Account",
-   "link_count": 0,
-   "link_to": "Whatsapp Account",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
   }
  ],
- "modified": "2022-12-29 01:06:16.593252",
+ "modified": "2022-12-29 14:51:15.021904",
  "modified_by": "Administrator",
  "module": "Novacept Email Post",
  "name": "Novacept Mail",
