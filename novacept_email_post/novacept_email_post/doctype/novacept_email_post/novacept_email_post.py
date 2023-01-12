@@ -3,7 +3,7 @@
 
 # import frappe
 from frappe.model.document import Document
-
+from frappe.utils.file_manager import get_file_path
 import frappe
 from frappe import _
 from frappe.core.doctype.communication.email import make
@@ -14,6 +14,10 @@ import msal
 import requests
 import json
 import re
+import base64
+import os
+
+
 class NovaceptEmailPost(Document):
 	def validate(self):
 		self.set_date()
@@ -163,21 +167,22 @@ def send_mail(entry, email_camp):
 		for recipient in recipient_list:
 			recipient_mail,recipient_subject,recipient_body = personalize_mail(recipient,subject,body)
 			endpoint = f'https://graph.microsoft.com/v1.0/users/{sender}/sendMail'
-			email_msg = {
-				'Message': {
-					'Subject': recipient_subject,
-					'Body': {
-						'ContentType': "HTML",
-						'Content': recipient_body
-					},
-					'ToRecipients': [
-					{
-						'EmailAddress': {
-							'Address': recipient_mail
-						}
-					}]
-				},
-			'SaveToSentItems': 'true'}
+			email_msg = payload_json(recipient_subject,recipient_body,recipient_mail)
+#			email_msg = {
+#				'Message': {
+#					'Subject': recipient_subject,
+#					'Body': {
+#						'ContentType': "HTML",
+#						'Content': recipient_body
+#					},
+#					'ToRecipients': [
+#					{
+#						'EmailAddress': {
+#							'Address': recipient_mail
+#						}
+#					}]
+#				},
+#			'SaveToSentItems': 'true'}
 
 			r= requests.post(endpoint,headers={'Authorization': 'Bearer ' + result['access_token']}, json=email_msg)
 
@@ -203,13 +208,61 @@ def send_mail(entry, email_camp):
 		print(result.get("error_description"))
 		print(result.get("correlation_id"))
 
+def payload_json(subject,body,email):
+
+	email_msg = {
+		'Message': {
+			'Subject':subject,
+			'Body': {
+				'ContentType': "HTML",
+				'Content': body
+			},
+			'ToRecipients': [
+			{
+				'EmailAddress': {
+					'Address': email
+				}
+			}]
+		},
+		'SaveToSentItems': 'true'}
+
+#	print(body)
+#	print(type(body))
+	attached_image = re.findall(r'src="(.*?)"',body)
+#	print(f'Attached images {attached_image}')
+	if not attached_image:
+		return email_msg
+	images = []
+	for img_file in attached_image:
+#		img_file = img.replace('<img src="','')
+#		img_file = img_file.replace('">','')
+		img_file_path = get_file_path(img_file)
+		with open(img_file_path,'rb') as upload:
+			media = base64.b64encode(upload.read())
+		media = media.decode('utf-8')
+		attachment_json = {
+			'@odata.type': '#microsoft.graph.fileAttachment',
+			'contentBytes':media,
+			'name': img_file.replace('/files/',''),
+			'contentType': 'image',
+			'contentId':img_file.replace('/files/','')
+		}
+		images.append(attachment_json)
+		body = body.replace(img_file,'cid:'+img_file.replace('/files/',''))
+	if attached_image:
+		email_msg['Message']['attachments'] = images
+		email_msg['Message']['Body']['Content'] = body
+#	print(email_msg)
+
+	return email_msg
+
 def personalize_mail(client,subject,body):
 	mail = frappe.db.get_value('Client',client,'email_id')
 	new_subject = placeholder(client,subject)
 	new_body = placeholder(client,body)
 	return mail,new_subject,new_body
 def placeholder(client,text):
-	place_holder = re.findall('{doc.\w+}', text)
+	place_holder = re.findall('{{doc.\w+}}', text)
 #		print(place_holder)
 #		print(0)
 	if not place_holder:
@@ -218,9 +271,9 @@ def placeholder(client,text):
 	values = []
 	for var in place_holder:
 #			print(var)
-		var = var.replace('{doc.','')
+		var = var.replace('{{doc.','')
 #			print(var)
-		var = var.replace('}','')
+		var = var.replace('}}','')
 #			print(var)
 		try:
 			value = frappe.db.get_value('Client',client,var)
