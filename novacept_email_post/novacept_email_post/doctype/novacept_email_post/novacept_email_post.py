@@ -47,9 +47,9 @@ class NovaceptEmailPost(Document):
 
 	def validate_client(self):
 		client_email_id = frappe.db.get_value("Client", self.recipient, "email_id")
-		if not lead_email_id:
-			lead_name = frappe.db.get_value("Client", self.recipient, "customer_name")
-			frappe.throw(_("Please set an email id for the Client {0}").format(lead_name))
+		if not client_email_id:
+			client_name = frappe.db.get_value("Client", self.recipient, "customer_name")
+			frappe.throw(_("Please set an email id for the Client {0}").format(client_name))
 
 	def trial(self):
 		print(self.last_post_time)
