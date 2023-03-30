@@ -301,3 +301,15 @@ def set_email_campaign_status():
 	for entry in email_post:
 		email_camp = frappe.get_doc("Novacept Email Post", entry.name)
 		email_camp.update_status()
+@frappe.whitelist()
+def demo():
+	c = 3
+	return c
+@frappe.whitelist()
+def demo2(a):
+	return a
+
+@frappe.whitelist()
+def demo3(a,b):
+	c = a+b
+	return c
